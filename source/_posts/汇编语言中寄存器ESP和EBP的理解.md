@@ -1,0 +1,42 @@
+---
+title: 汇编语言中寄存器ESP和EBP的理解
+date: 2017-11-04 12:31:45
+tags:
+	- 汇编语言
+	- 笔记
+categories: 汇编语言
+---
+
+# 汇编语言中寄存器ESP和EBP的理解
+
+>	学校在做信息活动月，有个活动是对xp系统中的一个应用程序进行反汇编，了解他的运行机制，但是在中间有一部分对寄存器的概念有点生疏，所以在网上看到一个好的材料，所以码一下
+
+一直对寄存器ESP和EBP的概念总是有些混淆，查看定义ESP是栈顶指针，EBP是存取堆栈指针。还是不能很透彻理解。之后借于一段汇编代码，总算是对两者有个比较清晰的理解。
+下面是按调用约定__stdcall 调用函数test(int p1,int p2)的汇编代码
+
+	;假设执行函数前堆栈指针ESP为NN
+	push   p2    ;参数2入栈, ESP -= 4h , ESP = NN - 4h
+	push   p1    ;参数1入栈, ESP -= 4h , ESP = NN - 8h
+	call test    ;压入返回地址 ESP -= 4h, ESP = NN - 0Ch  
+	;//进入函数内
+
+看完汇编后,再看EBP和ESP的定义,哦,豁然开朗,
+原来ESP就是一直指向栈顶的指针,而EBP只是存取某时刻的栈顶指针,以方便对栈的操作,如获取函数参数、局部变量等。
+
+
+
+	{
+			push   ebp                        ;保护先前EBP指针， EBP入栈， ESP-=4h, ESP = NN - 10h
+			mov    ebp, esp                   ;设置EBP指针指向栈顶 NN-10h
+			mov    eax, dword ptr  [ebp+0ch]  ;ebp+0ch为NN-4h,即参数2的位置
+			mov    ebx, dword ptr  [ebp+08h]  ;ebp+08h为NN-8h,即参数1的位置
+			sub    esp, 8                     ;局部变量所占空间ESP-=8, ESP = NN-18h
+			...
+			add    esp, 8                     ;释放局部变量, ESP+=8, ESP = NN-10h
+			pop    ebp                        ;出栈,恢复EBP, ESP+=4, ESP = NN-0Ch
+			ret    8                          ;ret返回,弹出返回地址,ESP+=4, ESP=NN-08h,
+												后面加操作数8为平衡堆栈,ESP+=8,ESP=NN, 恢复进入函数前的堆栈.
+	}
+	
+	
+转自：[通过一段汇编，加深对寄存器ESP和EBP的理解](http://blog.csdn.net/zsjum/article/details/6117043)
