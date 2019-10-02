@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    <link rel="canonical" href="http://ranxb.cn/2017/12/29/汇编第八章：数据处理的两个基本问题/">
+    
+    
+    <title>汇编第八章：数据处理的两个基本问题 | Ran Xuebin&#39;s Blog | 永远相信美好的事情即将发生</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="笔记,汇编语言">
+    <meta name="description" content="汇编第八章：数据处理的两个基本问题 章前言说的是对前面所有的内容是有总结性的，这里主要探讨两个问题：    处理的数据在什么地方？   处理的数据有多长？   定义两个符号reg和sregreg代表寄存器，包括：ax,bx,cx,dx,ah,al,bh,bl,ch,cl,dh,dl,sp,bp,si,disreg代表段寄存器，包括：ds,ss,cs,es bx、si、di、bp的使用规则 三个规则">
+<meta name="keywords" content="笔记,汇编语言">
+<meta property="og:type" content="article">
+<meta property="og:title" content="汇编第八章：数据处理的两个基本问题">
+<meta property="og:url" content="http://ranxb.cn/2017/12/29/汇编第八章：数据处理的两个基本问题/index.html">
+<meta property="og:site_name" content="Ran Xuebin&#39;s Blog">
+<meta property="og:description" content="汇编第八章：数据处理的两个基本问题 章前言说的是对前面所有的内容是有总结性的，这里主要探讨两个问题：    处理的数据在什么地方？   处理的数据有多长？   定义两个符号reg和sregreg代表寄存器，包括：ax,bx,cx,dx,ah,al,bh,bl,ch,cl,dh,dl,sp,bp,si,disreg代表段寄存器，包括：ds,ss,cs,es bx、si、di、bp的使用规则 三个规则">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2017-12-30T09:40:34.461Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="汇编第八章：数据处理的两个基本问题">
+<meta name="twitter:description" content="汇编第八章：数据处理的两个基本问题 章前言说的是对前面所有的内容是有总结性的，这里主要探讨两个问题：    处理的数据在什么地方？   处理的数据有多长？   定义两个符号reg和sregreg代表寄存器，包括：ax,bx,cx,dx,ah,al,bh,bl,ch,cl,dh,dl,sp,bp,si,disreg代表段寄存器，包括：ds,ss,cs,es bx、si、di、bp的使用规则 三个规则">
+    
+        <link rel="alternate" type="application/atom+xml" title="Ran Xuebin&#39;s Blog" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide">
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/avatar.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">冉学斌</h5>
+          <a href="mailto:ranxuebin@ranxb.cn" title="ranxuebin@ranxb.cn" class="mail">ranxuebin@ranxb.cn</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/">
+                <i class="icon icon-lg icon-home"></i>
+                主页
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives">
+                <i class="icon icon-lg icon-archives"></i>
+                仓库
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags">
+                <i class="icon icon-lg icon-tags"></i>
+                标签
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories">
+                <i class="icon icon-lg icon-th-list"></i>
+                分类
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://lab.ranxb.com">
+                <i class="icon icon-lg icon-lab"></i>
+                实验室
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/ranxuebin" target="_blank">
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="http://weibo.com/ranxuebin" target="_blank">
+                <i class="icon icon-lg icon-weibo"></i>
+                微博
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">汇编第八章：数据处理的两个基本问题</div>
+        
+        <div class="search-wrap" id="search-wrap">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="back">
+                <i class="icon icon-lg icon-chevron-left"></i>
+            </a>
+            <input type="text" id="key" class="search-input" autocomplete="off" placeholder="Search">
+            <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="search">
+                <i class="icon icon-lg icon-search"></i>
+            </a>
+        </div>
+        
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">汇编第八章：数据处理的两个基本问题</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2017-12-28T19:23:25.000Z" itemprop="datePublished" class="page-time">
+  2017-12-29
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/汇编语言/">汇编语言</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-1"><a class="post-toc-link" href="#汇编第八章：数据处理的两个基本问题"><span class="post-toc-number">1.</span> <span class="post-toc-text">汇编第八章：数据处理的两个基本问题</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#bx、si、di、bp的使用规则"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">bx、si、di、bp的使用规则</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#机器指令处理的数据在什么地方"><span class="post-toc-number">1.2.</span> <span class="post-toc-text">机器指令处理的数据在什么地方</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#汇编语言中数据位置的表达"><span class="post-toc-number">1.3.</span> <span class="post-toc-text">汇编语言中数据位置的表达</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#寻址方式"><span class="post-toc-number">1.4.</span> <span class="post-toc-text">寻址方式</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#指令要处理的数据有多长"><span class="post-toc-number">1.5.</span> <span class="post-toc-text">指令要处理的数据有多长</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#寻址的综合应用"><span class="post-toc-number">1.6.</span> <span class="post-toc-text">寻址的综合应用</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#div"><span class="post-toc-number">1.7.</span> <span class="post-toc-text">div</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#dd"><span class="post-toc-number">1.8.</span> <span class="post-toc-text">dd</span></a></li><li class="post-toc-item post-toc-level-2"><a class="post-toc-link" href="#dup"><span class="post-toc-number">1.9.</span> <span class="post-toc-text">dup</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+    
+<article id="post-汇编第八章：数据处理的两个基本问题" class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">汇编第八章：数据处理的两个基本问题</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2017-12-29 03:23:25" datetime="2017-12-28T19:23:25.000Z" itemprop="datePublished">2017-12-29</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/汇编语言/">汇编语言</a></li></ul>
+
+
+
+            
+<span id="busuanzi_container_page_pv" title="文章总阅读量" style="display:none">
+    <i class="icon icon-eye icon-pr"></i><span id="busuanzi_value_page_pv"></span>
+</span>
+
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <h1 id="汇编第八章：数据处理的两个基本问题"><a href="#汇编第八章：数据处理的两个基本问题" class="headerlink" title="汇编第八章：数据处理的两个基本问题"></a>汇编第八章：数据处理的两个基本问题</h1><blockquote>
+<p>章前言说的是对前面所有的内容是有总结性的，这里主要探讨两个问题：  </p>
+<ol>
+<li>处理的数据在什么地方？  </li>
+<li>处理的数据有多长？</li>
+</ol>
+</blockquote>
+<p>定义两个符号<strong>reg</strong>和<strong>sreg</strong><br><strong>reg</strong>代表寄存器，包括：ax,bx,cx,dx,ah,al,bh,bl,ch,cl,dh,dl,sp,bp,si,di<br><strong>sreg</strong>代表段寄存器，包括：ds,ss,cs,es</p>
+<h2 id="bx、si、di、bp的使用规则"><a href="#bx、si、di、bp的使用规则" class="headerlink" title="bx、si、di、bp的使用规则"></a>bx、si、di、bp的使用规则</h2><blockquote>
+<p>三个规则，一会总结，字比较多，等会打。</p>
+</blockquote>
+<ol>
+<li><p>只有这四个寄存器可以用在[…]中进行寻址  </p>
+<pre><code>mov ax,[bx]
+mov ax,[bx+si]
+</code></pre><p>以下的是错误的</p>
+<pre><code>mov ax,[cx]
+mov ax,[ax]
+</code></pre></li>
+<li><p>这四个可以单独出现，但是组合的情况只有四种可以使用：bx和si、bx和di、bp和si、bp和di。  </p>
+<pre><code>mov ax,[bx+si]
+mov ax,[bx+di]
+mov ax,[bp+si]
+mov ax,[bp+di+idata]
+</code></pre><p>以下的是错误的</p>
+<pre><code>mov ax.[bx+dp]
+mov ax,[si+di]
+</code></pre></li>
+<li><p>只要使用[…]中bp寄存器时，若没有显式的给出段寄存器，则默认为段地址在ss中</p>
+<pre><code>mov ax,[bp]             ;(ax) = ((ss)*16+(bp))
+</code></pre></li>
+</ol>
+<h2 id="机器指令处理的数据在什么地方"><a href="#机器指令处理的数据在什么地方" class="headerlink" title="机器指令处理的数据在什么地方"></a>机器指令处理的数据在什么地方</h2><p>机器指令都是经过处理过的数据：1、读取。2、存入。3、运行  </p>
+<p>所有处理的数据可以在三个地方：CPU内部、内存、端口（后面说先不用管）<br>例如：</p>
+<pre><code>mov bx,[0]                ;内存
+mov bx,ax                ;CPU内部ax寄存器
+mov bx,1                ;CPU内部指令缓冲器
+</code></pre><h2 id="汇编语言中数据位置的表达"><a href="#汇编语言中数据位置的表达" class="headerlink" title="汇编语言中数据位置的表达"></a>汇编语言中数据位置的表达</h2><p>汇编语言用3个概念来表达数据的位置：  </p>
+<ol>
+<li><p>立即数[idata]<br>例如：</p>
+<p> mov ax,1<br> add bx,2000H<br> or bx,00010000B<br> mov al,’a’</p>
+</li>
+</ol>
+<p>以上   </p>
+<ol start="2">
+<li><p>寄存器<br>例如</p>
+<p> mov ax,bx<br> push ds<br>以上  </p>
+</li>
+<li><p>段地址和偏移地址<br>例如</p>
+<p> mov ax,[bx]            ;段地址默认在ds中</p>
+</li>
+</ol>
+<h2 id="寻址方式"><a href="#寻址方式" class="headerlink" title="寻址方式"></a>寻址方式</h2><p><strong>五种寻址方式：</strong>  </p>
+<ol>
+<li>[idata] <strong>直接寻址</strong>  </li>
+<li>[bx] <strong>寄存器间接寻址</strong>  </li>
+<li>[bx+idata] <strong>寄存器相对寻址</strong>  </li>
+<li>[bx+si] <strong>基址变址寻址</strong>  </li>
+<li>[bx+si+idata] <strong>相对基址变址寻址</strong></li>
+</ol>
+<p>总结：<strong>有两个寄存器就是基址变址，只要有idata就是相对（只有idata是直接寻址，只有一个寄存器是寄存器间接寻址）</strong></p>
+<h2 id="指令要处理的数据有多长"><a href="#指令要处理的数据有多长" class="headerlink" title="指令要处理的数据有多长"></a>指令要处理的数据有多长</h2><ol>
+<li>通过寄存器名可以致命处理的数据长度</li>
+<li><p>在没有寄存器的情况下，用操作符“X ptr”指明要操作的长度，X可以是byte或者是word。<br>例如</p>
+<pre><code>mov word prt ds:[0],1
+inc word prt [bx]
+
+mov byte ptr ds:[0],1
+add byte ptr [bx],2
+</code></pre><h2 id="寻址的综合应用"><a href="#寻址的综合应用" class="headerlink" title="寻址的综合应用"></a>寻址的综合应用</h2><blockquote>
+<p>主要就是类c语言的数组的操作，看看书看就行了。</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="div"><a href="#div" class="headerlink" title="div"></a><strong>div</strong></h2><blockquote>
+<p>两种div方式！(被除数是除号之前的。)</p>
+</blockquote>
+<ol>
+<li>16位寄存器除以8位寄存器：16位做被除数放在AX里面。商在AL里，余数在AH里</li>
+<li>32位寄存器除以16位寄存器：高16位放在DX，低16位放在AX里，共32位做被除数。商在AX里，余数在DX里。  </li>
+</ol>
+<p><strong>商都放在低位寄存器中，余数放在高位，除数放在一个内存单元或者reg中</strong><br>例如：</p>
+<pre><code>16位/8位：
+    div byte ptr ds:[0]        
+    ;(al) = (ax)/((ds)*16+0)
+    ;(ah) = (ax)mod((ds)*16+0)
+
+32位/8位：
+    div word ptr ds:[0]        
+    ;(ax) = [(dx)*10000H + (ax)] / ((ds)*16+0)
+    ;(dx) = [(dx)*10000H + (ax)] mod ((ds)*16+0)
+</code></pre><p>实际应用，例如100001/100,100001 = 186A1H</p>
+<pre><code>mov dx,1H
+mov ax,86A1H
+mov bx,100
+div bx
+;商在AX里，余数在DX里
+</code></pre><h2 id="dd"><a href="#dd" class="headerlink" title="dd"></a>dd</h2><blockquote>
+<p>dd（define double）,用于定义双精度字节，一个双精度占2个字，4个字节。</p>
+</blockquote>
+<pre><code>data segment
+    db 1
+    dw 1
+    dd 1
+data ends
+</code></pre><p>上面这段：  </p>
+<pre><code>1. 第一个数据是01H，在data:[0]处  
+2. 第二个数据是0001H，在data:[1] - data:[2]处  
+3. 第三个数据是00000001H，在data:[3] - data:[6]处  
+</code></pre><h2 id="dup"><a href="#dup" class="headerlink" title="dup"></a>dup</h2><p>和dd一样都是一个操作符，它是和db、dw、dd等数据定义伪指令配合使用的，用来进行数据的重复，比如：</p>
+<pre><code>db 3 dup (0)
+</code></pre><p>定义了3个字节，他们的值都是0，相当于</p>
+<pre><code>db 0,0,0
+</code></pre><p>又例如：</p>
+<pre><code>db 3 dup (0,1,2)
+</code></pre><p>定义了9个字节，分别是0,1,2,0,1,2,0,1,2,相当于</p>
+<pre><code>db 0,1,2,0,1,2,0,1,2
+</code></pre><p><strong>使用规范如下</strong></p>
+<pre><code>db 重复次数 dup (内容)        ;(重复的字节型数据)
+dw 重复次数 dup (内容)        ;(重复的字型数据)
+dd 重复次数 dup (内容)        ;(重复的双精度字型数据)
+</code></pre>
+        </div>
+
+        <blockquote class="post-copyright">
+    <div class="content">
+        
+<span class="post-time">
+    Last updated: <time datetime="2017-12-30T09:40:34.461Z" itemprop="dateUpdated">2017-12-30 17:40:34</time>
+</span><br>
+
+
+        
+        如有其他问题请给我留言或发送邮件，我将尽可能及时回复。
+        
+    </div>
+    <footer>
+        <a href="http://ranxb.cn">
+            <img src="/img/avatar.jpg" alt="冉学斌">
+            冉学斌
+        </a>
+    </footer>
+</blockquote>
+
+        
+<div class="page-reward">
+    <a id="rewardBtn" href="javascript:;" class="page-reward-btn waves-effect waves-circle waves-light">赏</a>
+</div>
+
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/汇编语言/">汇编语言</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/笔记/">笔记</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2017/12/30/汇编第九章：转移指令的原理/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">汇编第九章：转移指令的原理</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2017/12/29/汇编第七章：更灵活的定位内存地址的方式/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">汇编第七章：更灵活的定位内存地址的方式</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+<div id="reward" class="page-modal reward-lay">
+    <a class="close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <h3 class="reward-title">
+        <i class="icon icon-quote-left"></i>
+        谢谢大爷~
+        <i class="icon icon-quote-right"></i>
+    </h3>
+    <div class="reward-content">
+        
+        <div class="reward-code">
+            <img id="rewardCode" src="/img/wechat.png" alt="打赏二维码">
+        </div>
+        
+        <label class="reward-toggle">
+            <input id="rewardToggle" type="checkbox" class="reward-toggle-check" data-wechat="/img/wechat.png" data-alipay="/img/alipay.png">
+            <div class="reward-toggle-ctrol">
+                <span class="reward-toggle-item wechat">微信</span>
+                <span class="reward-toggle-label"></span>
+                <span class="reward-toggle-item alipay">支付宝</span>
+            </div>
+        </label>
+        
+    </div>
+</div>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+<p>
+    <span id="busuanzi_container_site_uv" style="display:none">
+        站点总访客数：<span id="busuanzi_value_site_uv"></span>
+    </span>
+    <span id="busuanzi_container_site_pv" style="display:none">
+        站点总访问量：<span id="busuanzi_value_site_pv"></span>
+    </span>
+</p>
+
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blank" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>冉学斌 &copy; 2015 - 2019</span>
+            <span>
+                
+                <a href="http://www.miitbeian.gov.cn/" target="_blank">陇ICP备18001414号-1</a><br>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: true };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+<div class="search-panel" id="search-panel">
+    <ul class="search-result" id="search-result"></ul>
+</div>
+<template id="search-tpl">
+<li class="item">
+    <a href="{path}" class="waves-block waves-effect">
+        <div class="title ellipsis" title="{title}">{title}</div>
+        <div class="flex-row flex-middle">
+            <div class="tags ellipsis">
+                {tags}
+            </div>
+            <time class="flex-col time">{date}</time>
+        </div>
+    </a>
+</li>
+</template>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/search.min.js" async></script>
+
+
+
+
+
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+
+
+
+</body>
+</html>
